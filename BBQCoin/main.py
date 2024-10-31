@@ -96,10 +96,10 @@ if __name__ == "__main__":
     
     print_info_box(social_media_usernames)
     user_input = input("\nEnter BBQ query ID : ")
-    energy = input("Enter your energy value : ")
+    energy = input("Enter your energy value(try 30000 if you are lucky) : ")
     while True:
         data = bbq_tap(user_input,energy)
-        time.sleep(2)
+        time.sleep(0.5)
         try :
             print(Fore.GREEN + Style.BRIGHT + data)
         except:
