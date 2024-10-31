@@ -1,1 +1,5 @@
-requests 
+requests
+pycryptodome 
+pyfiglet
+colorama
+user-agent
