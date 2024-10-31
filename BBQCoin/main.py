@@ -3,6 +3,13 @@ import time
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad
 import requests 
+from urllib.parse import  parse_qs
+import json 
+import os
+import pyfiglet
+from colorama import Fore, Style, init
+from user_agent import generate_user_agent
+
 
 def encode_event(e, t):
     r = f"{e}|{t}|{int(time.time())}"
@@ -14,7 +21,7 @@ def encode_event(e, t):
     encrypted = cipher.encrypt(pad(r.encode('utf-8'), AES.block_size))
     return base64.b64encode(base64.b64encode(encrypted)).decode('utf-8')
 
-# replace your query id in the headers 
+init(autoreset=True)
 headers = {
     'accept': 'application/json, text/plain, */*',
     'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8',
@@ -32,19 +39,68 @@ headers = {
     'sec-fetch-dest': 'empty',
     'sec-fetch-mode': 'cors',
     'sec-fetch-site': 'same-site',
-    'use-agen': 'query_id=AAEA7AAAAAAA_YXvLvmCa&user=%7B%22id%22%%2C%22first_name%22%3A%22%E3%85%A4%22%2C%22last_name%22%3A%22%E2%81%AA%E2%81%AC%22%2C%22username%22%3A%%22%2C%22language_code%22%3A%22en%22%2C%22allows_write_to_pm%22%3Atrue%7D&auth_date=1730304409&hash=b5b7e6f18438a8dfd1ee61e50e80871638d137f091frj439frj775d07664e7b4f6',
-    'user-agent': 'add your custom header here ',
+    'user-agent':'',
+    'use-agen': '',
     'x-requested-with': 'org.telegram.messenger',
 }
 
-user_id = '123456789'#telegram user ID
-taps = '3000' #amount of taps
-def bbq_tap():
+
+def bbq_tap(query_id ,taps):
+    headers['user-agent'] = generate_user_agent('android')
+    headers['use-agen'] = query_id
+    id = str(json.loads(parse_qs(query_id)['user'][0])['id'])
     data = {
-        'id_user':user_id,
+        'id_user':id,
         'mm': taps ,
-        'game': encode_event(user_id,taps),
+        'game': encode_event(id,taps),
     }
-    response = requests.post('https://bbqbackcs.bbqcoin.ai/api/coin/earnmoney', headers=headers, data=data)
-    print(response.json())
-bbq_tap()
+    r = requests.post('https://bbqbackcs.bbqcoin.ai/api/coin/earnmoney', headers=headers, data=data)
+    return (r.text)
+
+def create_gradient_banner(text):
+    banner = pyfiglet.figlet_format(text).splitlines()
+    colors = [Fore.GREEN + Style.BRIGHT, Fore.YELLOW + Style.BRIGHT, Fore.RED + Style.BRIGHT]
+    total_lines = len(banner)
+    section_size = total_lines // len(colors)
+    for i, line in enumerate(banner):
+        if i < section_size:
+            print(colors[0] + line)  # Green
+        elif i < section_size * 2:
+            print(colors[1] + line)  # Yellow
+        else:
+            print(colors[2] + line)  # Red
+
+def print_info_box(social_media_usernames):
+    colors = [Fore.CYAN, Fore.MAGENTA, Fore.LIGHTYELLOW_EX, Fore.BLUE, Fore.LIGHTWHITE_EX]
+    
+    box_width = max(len(social) + len(username) for social, username in social_media_usernames) + 4
+    print(Fore.WHITE + Style.BRIGHT + '+' + '-' * (box_width - 2) + '+')
+    
+    for i, (social, username) in enumerate(social_media_usernames):
+        color = colors[i % len(colors)] 
+        print(color + f'| {social}: {username} |')
+    
+    print(Fore.WHITE + Style.BRIGHT + '+' + '-' * (box_width - 2) + '+')
+
+if __name__ == "__main__":
+    banner_text = "WHYWETAP"
+    os.system('cls' if os.name == 'nt' else 'clear')
+    create_gradient_banner(banner_text)
+    social_media_usernames = [
+        ("CryptoNews", "@ethcryptopia"),
+        ("Auto Farming", "@whywetap"),
+        ("Auto Farming", "@autominerx"),
+        #("", "@"),
+        ("Coder", "@demoncratos"),
+    ]
+    
+    print_info_box(social_media_usernames)
+    user_input = input("\nEnter BBQ query ID : ")
+    energy = input("Enter your energy value : ")
+    while True:
+        data = bbq_tap(user_input,energy)
+        time.sleep(2)
+        try :
+            print(Fore.GREEN + Style.BRIGHT + data)
+        except:
+            print(Fore.RED + Style.BRIGHT + data)
